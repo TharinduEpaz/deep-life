@@ -29,6 +29,23 @@
 		4E8465562FA05FF500640BD1 /* deeplifeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = deeplifeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4EF26A412FA076E9005D64B4 /* Exceptions for "deeplifeUITests" folder in "deeplife" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				readme.md,
+			);
+			target = 4E84653C2FA05FF300640BD1 /* deeplife */;
+		};
+		4EF26A422FA076E9005D64B4 /* Exceptions for "deeplifeUITests" folder in "deeplifeUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				readme.md,
+			);
+			target = 4E8465552FA05FF500640BD1 /* deeplifeUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4E84653F2FA05FF300640BD1 /* deeplife */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -42,6 +59,10 @@
 		};
 		4E8465592FA05FF500640BD1 /* deeplifeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4EF26A412FA076E9005D64B4 /* Exceptions for "deeplifeUITests" folder in "deeplife" target */,
+				4EF26A422FA076E9005D64B4 /* Exceptions for "deeplifeUITests" folder in "deeplifeUITests" target */,
+			);
 			path = deeplifeUITests;
 			sourceTree = "<group>";
 		};

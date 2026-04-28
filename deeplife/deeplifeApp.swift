@@ -12,7 +12,7 @@ import SwiftData
 struct deeplifeApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Project.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -24,9 +24,16 @@ struct deeplifeApp: App {
     }()
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             ContentView()
+                .modelContainer(sharedModelContainer)
         }
-        .modelContainer(sharedModelContainer)
+        .defaultSize(width: 460, height: 520)
+
+        MenuBarExtra("Deep Life", systemImage: "chart.bar.fill") {
+            MenuBarView()
+                .modelContainer(sharedModelContainer)
+        }
+        .menuBarExtraStyle(.window)
     }
 }
