@@ -15,7 +15,7 @@ struct MenuBarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Deep Life")
+                Text("Ritsu (律)")
                     .font(.headline)
                 Spacer()
                 Button("Open") {
@@ -50,7 +50,7 @@ struct MenuBarView: View {
             } label: {
                 HStack {
                     Image(systemName: "power")
-                    Text("Quit Deep Life")
+                    Text("Quit Ritsu (律)")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

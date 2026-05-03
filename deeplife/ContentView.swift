@@ -13,6 +13,7 @@ struct ContentView: View {
     @Query(sort: \Project.name) private var projects: [Project]
     @State private var showingAddSheet = false
     @State private var projectToDelete: Project?
+    @State private var projectToEdit: Project?
 
     let columns = [
         GridItem(.adaptive(minimum: 160), spacing: 16)
@@ -23,9 +24,12 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Deep Life")
+                        Text("Ritsu (律)")
                             .font(.largeTitle.bold())
+                        Text("A Discipline Builder")
+                            .font(.title3)
                         weekRangeLabel
+                        
                     }
                     Spacer()
                     Button {
@@ -57,6 +61,9 @@ struct ContentView: View {
                             ProjectCard(
                                 project: project,
                                 isConfirmingDelete: projectToDelete?.id == project.id,
+                                onEditTap: {
+                                    projectToEdit = project
+                                },
                                 onDeleteTap: {
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         projectToDelete = project
@@ -90,6 +97,9 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddSheet) {
             AddProjectSheet()
         }
+        .sheet(item: $projectToEdit) { project in
+            EditProjectSheet(project: project)
+        }
     }
 
     private var weekRangeLabel: some View {
@@ -110,6 +120,7 @@ struct ContentView: View {
 struct ProjectCard: View {
     @Bindable var project: Project
     var isConfirmingDelete: Bool = false
+    var onEditTap: () -> Void = {}
     var onDeleteTap: () -> Void = {}
     var onConfirmDelete: () -> Void = {}
     var onCancelDelete: () -> Void = {}
@@ -150,6 +161,11 @@ struct ProjectCard: View {
             }
             .buttonStyle(.plain)
             .contextMenu {
+                Button {
+                    onEditTap()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
                 Button(role: .destructive) {
                     onDeleteTap()
                 } label: {
@@ -189,6 +205,33 @@ struct ProjectCard: View {
 
 // MARK: - Animated Progress Border
 
+struct RoundedRectProgressShape: Shape {
+    var cornerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let cr = min(cornerRadius, min(rect.width, rect.height) / 2)
+        var path = Path()
+
+        // Start from top-center, go clockwise
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - cr, y: rect.minY))
+        path.addArc(center: CGPoint(x: rect.maxX - cr, y: rect.minY + cr),
+                     radius: cr, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - cr))
+        path.addArc(center: CGPoint(x: rect.maxX - cr, y: rect.maxY - cr),
+                     radius: cr, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.minX + cr, y: rect.maxY))
+        path.addArc(center: CGPoint(x: rect.minX + cr, y: rect.maxY - cr),
+                     radius: cr, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + cr))
+        path.addArc(center: CGPoint(x: rect.minX + cr, y: rect.minY + cr),
+                     radius: cr, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
+
+        return path
+    }
+}
+
 struct ProgressBorder: View {
     var progress: Double
 
@@ -203,13 +246,12 @@ struct ProgressBorder: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(.quaternary, lineWidth: 3)
 
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectProgressShape(cornerRadius: 16)
                 .trim(from: 0, to: CGFloat(progress))
                 .stroke(
                     progressColor,
                     style: StrokeStyle(lineWidth: 3, lineCap: .round)
                 )
-                .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.4, dampingFraction: 0.7), value: progress)
         }
     }
@@ -294,7 +336,114 @@ struct AddProjectSheet: View {
             }
         }
         .padding(24)
-        .frame(width: 360, height: 440)
+        .frame(width: 360, height: 500)
+    }
+}
+
+// MARK: - Edit Project Sheet
+
+struct EditProjectSheet: View {
+    @Bindable var project: Project
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var name: String
+    @State private var emoji: String
+    @State private var weeklyTarget: Int
+    @State private var weeklyCount: Int
+
+    init(project: Project) {
+        self.project = project
+        _name = State(initialValue: project.name)
+        _emoji = State(initialValue: project.emoji)
+        _weeklyTarget = State(initialValue: project.weeklyTarget)
+        _weeklyCount = State(initialValue: project.weeklyCount)
+    }
+
+    let emojiOptions = [
+        "🏋️", "🏃", "☁️", "🏗️", "⎈", "🌱", "📚", "💻", "🎸", "🧘",
+        "✍️", "🎨", "🧪", "📐", "🔧", "🗣️", "🏊", "🚴", "🧠", "📌"
+    ]
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Text("Edit Project")
+                .font(.title2.bold())
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Emoji")
+                    .font(.subheadline.bold())
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 40))], spacing: 8) {
+                    ForEach(emojiOptions, id: \.self) { option in
+                        Text(option)
+                            .font(.title2)
+                            .frame(width: 40, height: 40)
+                            .background(
+                                emoji == option ? Color.accentColor.opacity(0.2) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 8)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .strokeBorder(emoji == option ? Color.accentColor : Color.clear, lineWidth: 2)
+                            )
+                            .onTapGesture { emoji = option }
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Name")
+                    .font(.subheadline.bold())
+                TextField("e.g. Gym, AWS Cert, Gardening", text: $name)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Weekly Target")
+                    .font(.subheadline.bold())
+                HStack {
+                    Text("\(weeklyTarget)")
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .frame(width: 40)
+                    Stepper("", value: $weeklyTarget, in: 1...21)
+                        .labelsHidden()
+                    Spacer()
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Current Count")
+                    .font(.subheadline.bold())
+                HStack {
+                    Text("\(weeklyCount)")
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .frame(width: 40)
+                    Stepper("", value: $weeklyCount, in: 0...weeklyTarget)
+                        .labelsHidden()
+                    Spacer()
+                }
+            }
+
+            Spacer()
+
+            HStack(spacing: 12) {
+                Button("Cancel") {
+                    dismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+
+                Button("Save") {
+                    project.name = name
+                    project.emoji = emoji
+                    project.weeklyTarget = weeklyTarget
+                    project.weeklyCount = weeklyCount
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(24)
+        .frame(width: 360, height: 580)
     }
 }
 
@@ -310,6 +459,7 @@ struct AddProjectSheet: View {
         Project(name: "Kubernetes", emoji: "⎈", weeklyTarget: 4, weeklyCount: 4),
         Project(name: "Gardening", emoji: "🌱", weeklyTarget: 2, weeklyCount: 1),
     ]
+    
     for p in sampleProjects {
         container.mainContext.insert(p)
     }

@@ -30,7 +30,7 @@ struct deeplifeApp: App {
         }
         .defaultSize(width: 460, height: 520)
 
-        MenuBarExtra("Deep Life", systemImage: "chart.bar.fill") {
+        MenuBarExtra("Ritsu (律)", systemImage: "chart.bar.fill") {
             MenuBarView()
                 .modelContainer(sharedModelContainer)
         }
