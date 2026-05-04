@@ -127,6 +127,7 @@ struct ProjectCard: View {
 
     var body: some View {
         ZStack {
+            
             Button {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                     project.resetIfNewWeek()
@@ -134,7 +135,9 @@ struct ProjectCard: View {
                         project.weeklyCount += 1
                     }
                 }
-            } label: {
+            }
+            
+            label: {
                 VStack(spacing: 10) {
                     Text(project.emoji)
                         .font(.system(size: 36))
